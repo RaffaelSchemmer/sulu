@@ -65,6 +65,11 @@ class Media extends ApiWrapper
     protected $url;
 
     /**
+     * @var string|null
+     */
+    protected $adminUrl;
+
+    /**
      * @var array
      */
     protected $formats = [];
@@ -713,6 +718,30 @@ class Media extends ApiWrapper
     public function setUrl($url)
     {
         $this->url = $url;
+    }
+
+    /**
+     * @VirtualProperty
+     * @SerializedName("adminUrl")
+     *
+     * @return string
+     */
+    public function getAdminUrl()
+    {
+        // if the admin url is not set the media is not private and so can be received over the website url
+        if (!$this->adminUrl) {
+            return $this->url;
+        }
+
+        return $this->adminUrl;
+    }
+
+    /**
+     * @param string|null $url
+     */
+    public function setAdminUrl($adminUrl)
+    {
+        $this->adminUrl = $adminUrl;
     }
 
     /**

@@ -34,6 +34,7 @@ use Sulu\Bundle\MediaBundle\Media\FormatManager\FormatManagerInterface;
 use Sulu\Bundle\MediaBundle\Media\Storage\StorageInterface;
 use Sulu\Bundle\MediaBundle\Media\TypeManager\TypeManagerInterface;
 use Sulu\Bundle\TagBundle\Tag\TagManagerInterface;
+use Sulu\Component\HttpKernel\SuluKernel;
 use Sulu\Component\PHPCR\PathCleanupInterface;
 use Sulu\Component\Security\Authentication\UserInterface;
 use Sulu\Component\Security\Authentication\UserRepositoryInterface;
@@ -42,6 +43,7 @@ use Sulu\Component\Security\Authorization\SecurityCheckerInterface;
 use Sulu\Component\Security\Authorization\SecurityCondition;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 /**
@@ -151,6 +153,16 @@ class MediaManager implements MediaManagerInterface
     public $count;
 
     /**
+     * @var string
+     */
+    private $privateAdminDownloadPath;
+
+    /**
+     * @var string
+     */
+    private $suluContext;
+
+    /**
      * @param array $permissions
      * @param string $downloadPath
      * @param string $maxFileSize
@@ -173,7 +185,9 @@ class MediaManager implements MediaManagerInterface
         $permissions,
         $downloadPath,
         $maxFileSize,
-        TargetGroupRepositoryInterface $targetGroupRepository = null
+        TargetGroupRepositoryInterface $targetGroupRepository = null,
+        $privateAdminDownloadPath = '/admin/media/{id}/download/{slug}',
+        $suluContext = SuluKernel::CONTEXT_WEBSITE
     ) {
         $this->mediaRepository = $mediaRepository;
         $this->collectionRepository = $collectionRepository;
@@ -193,6 +207,8 @@ class MediaManager implements MediaManagerInterface
         $this->permissions = $permissions;
         $this->downloadPath = $downloadPath;
         $this->maxFileSize = $maxFileSize;
+        $this->privateAdminDownloadPath = $privateAdminDownloadPath;
+        $this->suluContext = $suluContext;
     }
 
     public function getById($id, $locale)
@@ -843,7 +859,7 @@ class MediaManager implements MediaManagerInterface
                 $id,
                 \rawurlencode($fileName),
             ],
-            $this->downloadPath
+                $this->downloadPath
         ) . '?v=' . $version;
     }
 
